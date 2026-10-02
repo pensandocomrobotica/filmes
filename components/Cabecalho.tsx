@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import CampoBusca, { CLASSES_CAMPO_BUSCA } from "./CampoBusca";
 
 export default function Cabecalho() {
   return (
@@ -13,13 +15,11 @@ export default function Cabecalho() {
           <label htmlFor="busca" className="sr-only">
             Buscar filme
           </label>
-          <input
-            id="busca"
-            name="q"
-            type="search"
-            placeholder="🔍 Buscar filme..."
-            className="w-full rounded-full border border-borda bg-superficie px-4 py-2 text-sm outline-none placeholder:text-apagado focus:border-destaque"
-          />
+          <Suspense
+            fallback={<input id="busca" name="q" type="search" placeholder="🔍 Buscar filme..." className={CLASSES_CAMPO_BUSCA} />}
+          >
+            <CampoBusca />
+          </Suspense>
         </form>
 
         <Link
