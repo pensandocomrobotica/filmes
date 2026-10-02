@@ -21,7 +21,9 @@ export default function ListasFavoritos() {
   const [itens, setItens] = useState<ItemFavorito[] | null>(null);
 
   useEffect(() => {
-    listarFavoritos().then(setItens);
+    listarFavoritos()
+      .then(setItens)
+      .catch(() => setItens([]));
   }, []);
 
   return (

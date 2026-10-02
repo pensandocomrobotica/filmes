@@ -20,13 +20,27 @@ const CHAVE = "catalogo-filmes:favoritos";
 // Cópia em memória: usada quando o localStorage não existe ou está bloqueado.
 let memoria: ItemFavorito[] = [];
 
+const LISTAS: Lista[] = ["favoritos", "quero-assistir"];
+
+// Descarta itens salvos com formato inesperado (dados antigos ou editados à mão).
+function itemValido(item: unknown): item is ItemFavorito {
+  if (typeof item !== "object" || item === null) return false;
+  const i = item as Record<string, unknown>;
+  return (
+    typeof i.id === "number" &&
+    typeof i.titulo === "string" &&
+    typeof i.adicionadoEm === "string" &&
+    LISTAS.includes(i.lista as Lista)
+  );
+}
+
 function ler(): ItemFavorito[] {
   try {
     const texto = globalThis.localStorage?.getItem(CHAVE);
     if (texto === undefined) return memoria;
     if (texto === null) return [];
     const dados: unknown = JSON.parse(texto);
-    return Array.isArray(dados) ? (dados as ItemFavorito[]) : [];
+    return Array.isArray(dados) ? dados.filter(itemValido) : [];
   } catch (e) {
     // JSON corrompido: começa do zero. Armazenamento bloqueado: usa a memória.
     return e instanceof SyntaxError ? [] : memoria;

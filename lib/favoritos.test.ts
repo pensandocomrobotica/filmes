@@ -104,6 +104,19 @@ describe("favoritos", () => {
     expect(await fav.listarFavoritos()).toEqual([]);
   });
 
+  it("itens com formato inválido são descartados sem quebrar", async () => {
+    const valido = { id: 603, titulo: "Matrix", poster: null, nota: 8.2, lista: "favoritos", adicionadoEm: "2026-10-02T10:00:00.000Z" };
+    localStorage.setItem(
+      CHAVE,
+      JSON.stringify([null, 42, { id: 1 }, { ...valido, id: 2, lista: "outra" }, { ...valido, id: 3, adicionadoEm: undefined }, valido]),
+    );
+    const fav = await carregar();
+    expect((await fav.listarFavoritos()).map((f) => f.id)).toEqual([603]);
+    expect(await fav.eFavorito(1, "favoritos")).toBe(false);
+    await fav.adicionarFavorito(amelie, "quero-assistir");
+    expect(await fav.listarFavoritos()).toHaveLength(2);
+  });
+
   it("localStorage que lança exceção: funciona em memória", async () => {
     vi.stubGlobal("localStorage", {
       getItem: () => {
