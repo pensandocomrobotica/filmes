@@ -1,13 +1,41 @@
-import GradeFilmes from "@/components/GradeFilmes";
-import type { Filme } from "@/lib/tmdb/tipos";
+import Link from "next/link";
+import { Suspense } from "react";
+import BarraFiltros from "@/components/BarraFiltros";
+import EsqueletoGrade from "@/components/EsqueletoGrade";
+import ListaPaginada from "@/components/ListaPaginada";
+import { filtrosParaQuery, lerFiltros } from "@/lib/filtros";
+import { buscarCatalogo, listarGeneros, listarPlataformas } from "@/lib/tmdb/filmes";
+import type { Filtros } from "@/lib/tmdb/tipos";
 
-// Página temporária: substituída pelo catálogo real na próxima tarefa.
-const exemplos: Filme[] = [
-  { id: 603, titulo: "Matrix", poster: "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg", nota: 8.2, ano: 1999 },
-  { id: 1, titulo: "Filme sem pôster", poster: null, nota: 6.5, ano: 2020 },
-  { id: 2, titulo: "Filme sem nota", poster: null, nota: null, ano: null },
-];
+export default async function Catalogo({ searchParams }: PageProps<"/">) {
+  const filtros = lerFiltros(await searchParams);
+  const consulta = filtrosParaQuery(filtros);
+  const [plataformas, generos] = await Promise.all([listarPlataformas(), listarGeneros()]);
 
-export default function Inicio() {
-  return <GradeFilmes filmes={exemplos} />;
+  return (
+    <>
+      <BarraFiltros plataformas={plataformas} generos={generos} filtros={filtros} />
+      {/* A key faz a grade recomeçar (com esqueleto) sempre que os filtros mudam. */}
+      <Suspense key={consulta} fallback={<EsqueletoGrade />}>
+        <ResultadoCatalogo filtros={filtros} consulta={consulta} />
+      </Suspense>
+    </>
+  );
+}
+
+async function ResultadoCatalogo({ filtros, consulta }: { filtros: Filtros; consulta: string }) {
+  const inicial = await buscarCatalogo(filtros, 1);
+
+  if (inicial.filmes.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-20 text-center">
+        <p className="text-lg">Nenhum filme encontrado com esses filtros</p>
+        <Link href="/" className="rounded-full bg-destaque px-5 py-2 font-medium text-background hover:opacity-90">
+          Limpar filtros
+        </Link>
+      </div>
+    );
+  }
+
+  return <ListaPaginada key={consulta} inicial={inicial} consulta={consulta} />;
 }
