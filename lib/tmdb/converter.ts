@@ -31,7 +31,13 @@ export function converterGeneros(cru: { genres: GeneroTmdb[] }): Genero[] {
 
 export function converterPlataformas(cru: { results: PlataformaTmdb[] }): Plataforma[] {
   return cru.results
-    .map((p) => ({ id: p.provider_id, nome: p.provider_name, logo: p.logo_path ?? null, prioridade: p.display_priority }))
+    .map((p) => ({
+      id: p.provider_id,
+      nome: p.provider_name,
+      logo: p.logo_path ?? null,
+      // A ordem do Brasil reflete melhor as plataformas mais usadas aqui.
+      prioridade: p.display_priorities?.BR ?? p.display_priority,
+    }))
     .sort((a, b) => a.prioridade - b.prioridade);
 }
 

@@ -76,6 +76,18 @@ describe("converterPlataformas", () => {
     expect(r.map((p) => p.id)).toEqual([2, 3, 1]);
     expect(r[0]).toEqual({ id: 2, nome: "P2", logo: "/l2.png", prioridade: 1 });
   });
+
+  it("usa a prioridade do Brasil quando o TMDB a informa", () => {
+    const r = converterPlataformas({
+      results: [
+        { ...plataforma(3, 2), display_priorities: { BR: 30, US: 1 } },
+        { ...plataforma(1899, 40), display_priorities: { BR: 8 } },
+        { ...plataforma(8, 0), display_priorities: { BR: 0 } },
+      ],
+    });
+    expect(r.map((p) => p.id)).toEqual([8, 1899, 3]);
+    expect(r[1].prioridade).toBe(8);
+  });
 });
 
 describe("converterDetalhes", () => {

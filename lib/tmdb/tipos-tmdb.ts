@@ -23,6 +23,8 @@ export type PlataformaTmdb = {
   provider_name: string;
   logo_path: string | null;
   display_priority: number;
+  // Prioridade por país (vem na lista geral de plataformas).
+  display_priorities?: Record<string, number>;
 };
 
 export type PessoaElencoTmdb = {
